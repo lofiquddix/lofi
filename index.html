@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUDDIX FM</title>
+    <style>
+        /* --- СБРОС И БАЗА --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+            user-select: none;
+        }
+
+        /* --- ФОН (ВИДЕО) --- */
+        #bg-video {
+            position: fixed;
+            top: 50%; left: 50%;
+            min-width: 100%; min-height: 100%;
+            width: auto; height: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            z-index: -2;
+            filter: brightness(0.6) contrast(1.1);
+            transition: filter 1s ease;
+        }
+
+        /* Зернистость для атмосферы */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIj48ZmlsdGVyIGlkPSJnoiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2cpIiBvcGFjaXR5PSIwLjA1Ii8+PC9zdmc+');
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.7;
+        }
+
+        /* --- ЭКРАН ВХОДА --- */
+        #start-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 10, 15, 0.95);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+
+        .enter-btn {
+            background: transparent;
+            color: #fff;
+            font-size: 1.5rem;
+            padding: 15px 40px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .enter-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #fff;
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
+        }
+
+        /* --- ОСНОВНОЙ ИНТЕРФЕЙС --- */
+        .main-container {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+            opacity: 0; /* Скрыто до старта */
+            transition: opacity 1s ease 0.5s;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 200;
+            letter-spacing: 10px;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        h1 span { font-weight: 700; color: #a29bfe; }
+
+        .status-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.8);
+            margin-top: 20px;
+        }
+
+        .live-dot {
+            width: 8px; height: 8px;
+            background: #ff4757;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ff4757;
+            animation: pulse 2s infinite;
+        }
+
+        /* Индикатор загрузки/ошибки */
+        .loader-text {
+            display: block;
+            margin-top: 10px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 1px;
+            height: 20px; /* Фиксированная высота чтобы не прыгало */
+        }
+
+        /* --- ФУТЕР (ГРОМКОСТЬ И ССЫЛКИ) --- */
+        .footer {
+            position: fixed;
+            bottom: 40px;
+            left: 0; width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 50px;
+            opacity: 0;
+            transition: opacity 1s ease 1s;
+        }
+
+        .twitch-btn {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: color 0.3s;
+        }
+        .twitch-btn:hover { color: #fff; }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(0,0,0,0.4);
+            padding: 12px 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100px;
+            height: 3px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px; height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+        /* АНИМАЦИИ */
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Адаптив */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; letter-spacing: 5px; }
+            .footer { padding: 0 20px; bottom: 20px; flex-direction: column-reverse; gap: 20px; }
+            .volume-control { width: 100%; justify-content: center; }
+            input[type="range"] { width: 60%; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div id="start-screen">
+        <button class="enter-btn" id="init-btn">
+            <i class="fas fa-play"></i> START RADIO
+        </button>
+    </div>
+
+    <video id="bg-video" muted loop playsinline>
+        <source src="https://kappa.lol/ctH0sI.mp4" type="video/mp4">
+    </video>
+    <div class="noise-overlay"></div>
+
+    <div class="main-container" id="ui-container">
+        <h1>LOFI <span>QUDDIX</span></h1>
+        
+        <div class="status-bar">
+            <div class="live-dot" id="live-dot"></div>
+            <span id="status-text">OFFLINE</span>
+        </div>
+        
+        <div class="loader-text" id="debug-text">Waiting for user interaction...</div>
+    </div>
+
+    <div class="footer" id="ui-footer">
+        <a href="https://www.twitch.tv/quddix" target="_blank" class="twitch-btn">
+            <i class="fab fa-twitch"></i> quddix
+        </a>
+
+        <div class="volume-control">
+            <i class="fas fa-volume-down" style="color:rgba(255,255,255,0.7)"></i>
+            <input type="range" id="volume-slider" min="0" max="100" value="60">
+        </div>
+    </div>
+
+    <script>
+        // --- 1. ПЛЕЙЛИСТ (Только прямые и надежные ссылки) ---
+        // Используем CDN Pixabay с корректными параметрами
+        const rawTracks = [
+            "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-chill-medium-version-159456.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d46e30097e.mp3?filename=lofi-study-112191.mp3",
+            "https://cdn.pixabay.com/download/audio/2021/11/24/audio_8f46eb24df.mp3?filename=just-relax-11009.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/03/23/audio_07963dc558.mp3?filename=lost-in-dreams-13354.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/01/21/audio_31743c58bd.mp3?filename=spirit-blossom-15285.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/04/25/audio_4047805160.mp3?filename=empty-mind-118973.mp3",
+            "https://cdn.pixabay.com/download/audio/2021/11/20/audio_73147f202c.mp3?filename=simplicity-15638.mp3",
+            "https://cdn.pixabay.com/download/audio/2021/11/16/audio_057922d556.mp3?filename=better-days-15509.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/03/10/audio_5e6f0d9bb9.mp3?filename=chill-abstract-intention-12099.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/05/05/audio_13344d5702.mp3?filename=good-night-160166.mp3",
+            "https://cdn.pixabay.com/download/audio/2021/09/06/audio_9422567426.mp3?filename=lofi-beat-chill-7407.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/01/18/audio_6ef7c7c70b.mp3?filename=warm-memories-183698.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/03/15/audio_a9d23a1a02.mp3?filename=lofi-chill-112189.mp3"
+        ];
+
+        // Умножаем список, чтобы имитировать бесконечное радио (50+ слотов)
+        // Реальных треков меньше, но они будут перемешаны
+        let playlist = [];
+        for(let i=0; i<4; i++) {
+            playlist = playlist.concat(rawTracks);
+        }
+
+        // --- 2. ЛОГИКА ---
+        const audio = new Audio();
+        audio.crossOrigin = "anonymous"; // Важно для загрузки
+        
+        const dom = {
+            startScreen: document.getElementById('start-screen'),
+            initBtn: document.getElementById('init-btn'),
+            video: document.getElementById('bg-video'),
+            ui: document.getElementById('ui-container'),
+            footer: document.getElementById('ui-footer'),
+            statusText: document.getElementById('status-text'),
+            debugText: document.getElementById('debug-text'),
+            volume: document.getElementById('volume-slider'),
+            dot: document.getElementById('live-dot')
+        };
+
+        let currentIndex = 0;
+        let isErrorState = false;
+
+        // Функция перемешивания (Shuffle)
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        // Инициализация
+        playlist = shuffle(playlist);
+
+        function playTrack(index) {
+            if (index >= playlist.length) currentIndex = 0;
+            
+            const trackUrl = playlist[currentIndex];
+            
+            // Визуальный статус
+            dom.statusText.textContent = "TUNING...";
+            dom.debugText.textContent = `Loading track ${currentIndex + 1}...`;
+            dom.dot.style.background = "#ffa502"; // Оранжевый при загрузке
+
+            audio.src = trackUrl;
+            audio.volume = dom.volume.value / 100;
+            
+            const playPromise = audio.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Успех
+                    dom.statusText.textContent = "ON AIR";
+                    dom.debugText.textContent = "Playing Lofi Hip Hop";
+                    dom.dot.style.background = "#ff4757"; // Красный (Live)
+                    isErrorState = false;
+                })
+                .catch(error => {
+                    console.warn("Play failed:", error);
+                    handleError();
+                });
+            }
+        }
+
+        function playNext() {
+            currentIndex++;
+            playTrack(currentIndex);
+        }
+
+        // Защита от зависания (Anti-Freeze)
+        function handleError() {
+            if (isErrorState) return; // Чтобы не спамить ошибками
+            isErrorState = true;
+
+            dom.statusText.textContent = "RECONNECTING";
+            dom.debugText.textContent = "Stream interrupted. Retrying in 2s...";
+            dom.dot.style.background = "#747d8c"; // Серый
+
+            // Ждем 2 секунды перед следующей попыткой (КРИТИЧНО)
+            setTimeout(() => {
+                isErrorState = false;
+                playNext();
+            }, 2000);
+        }
+
+        // --- 3. СОБЫТИЯ ---
+
+        // Нажатие кнопки СТАРТ
+        dom.initBtn.addEventListener('click', () => {
+            // 1. Скрываем экран входа
+            dom.startScreen.style.opacity = '0';
+            dom.startScreen.style.visibility = 'hidden';
+            
+            // 2. Показываем интерфейс
+            dom.ui.style.opacity = '1';
+            dom.footer.style.opacity = '1';
+
+            // 3. Запускаем видео
+            dom.video.play().catch(e => console.log("Video fail"));
+
+            // 4. Запускаем аудио
+            playTrack(currentIndex);
+        });
+
+        // Трек закончился -> следующий
+        audio.addEventListener('ended', playNext);
+        
+        // Ошибка загрузки файла -> обработчик
+        audio.addEventListener('error', handleError);
+
+        // Громкость
+        dom.volume.addEventListener('input', (e) => {
+            audio.volume = e.target.value / 100;
+        });
+
+        // Клавиши
+        document.addEventListener('keydown', (e) => {
+            if(e.code === 'Space') {
+                e.preventDefault();
+                // Mute logic вместо паузы (это радио)
+                audio.muted = !audio.muted;
+                dom.debugText.textContent = audio.muted ? "Muted" : "Playing";
+            }
+        });
+
+    </script>
+</body>
+</html>
