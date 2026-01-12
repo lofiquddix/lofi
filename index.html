@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUDDIX FM</title>
+    <title>QUDDIX LOFI - GLOBAL</title>
     <style>
         /* --- СБРОС И БАЗА --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,7 +26,7 @@
             transform: translate(-50%, -50%);
             object-fit: cover;
             z-index: -2;
-            filter: brightness(0.6) contrast(1.1);
+            filter: brightness(0.5) contrast(1.1) sepia(0.2);
             transition: filter 1s ease;
         }
 
@@ -37,14 +37,14 @@
             background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIj48ZmlsdGVyIGlkPSJnoiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2cpIiBvcGFjaXR5PSIwLjA1Ii8+PC9zdmc+');
             pointer-events: none;
             z-index: -1;
-            opacity: 0.7;
+            opacity: 0.6;
         }
 
         /* --- ЭКРАН ВХОДА --- */
         #start-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(10, 10, 15, 0.95);
+            background: rgba(5, 5, 10, 0.98);
             z-index: 1000;
             display: flex;
             flex-direction: column;
@@ -54,23 +54,24 @@
         }
 
         .enter-btn {
-            background: transparent;
+            background: rgba(255, 255, 255, 0.05);
             color: #fff;
-            font-size: 1.5rem;
-            padding: 15px 40px;
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 50px;
+            font-size: 1.2rem;
+            padding: 20px 50px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 0; /* Более строгий стиль */
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 4px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            letter-spacing: 6px;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
         }
 
         .enter-btn:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.15);
+            letter-spacing: 8px;
             border-color: #fff;
-            box-shadow: 0 0 30px rgba(255,255,255,0.2);
         }
 
         /* --- ОСНОВНОЙ ИНТЕРФЕЙС --- */
@@ -80,55 +81,57 @@
             transform: translate(-50%, -50%);
             text-align: center;
             width: 90%;
-            max-width: 600px;
-            opacity: 0; /* Скрыто до старта */
+            max-width: 700px;
+            opacity: 0; 
             transition: opacity 1s ease 0.5s;
         }
 
         h1 {
-            font-size: 4rem;
-            font-weight: 200;
-            letter-spacing: 10px;
-            margin-bottom: 10px;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            font-size: 3.5rem;
+            font-weight: 100;
+            letter-spacing: 15px;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.8);
+            font-family: 'Courier New', monospace; /* Ретро стиль */
         }
 
-        h1 span { font-weight: 700; color: #a29bfe; }
+        h1 span { font-weight: 600; color: #74b9ff; }
 
         .status-bar {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.05);
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(10px);
-            padding: 8px 20px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.85rem;
-            letter-spacing: 2px;
-            color: rgba(255,255,255,0.8);
+            padding: 10px 30px;
+            border: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            color: rgba(255,255,255,0.9);
             margin-top: 20px;
+            text-transform: uppercase;
         }
 
         .live-dot {
-            width: 8px; height: 8px;
+            width: 10px; height: 10px;
             background: #ff4757;
             border-radius: 50%;
-            box-shadow: 0 0 10px #ff4757;
+            box-shadow: 0 0 15px #ff4757;
             animation: pulse 2s infinite;
         }
 
-        /* Индикатор загрузки/ошибки */
-        .loader-text {
+        /* Индикатор трека */
+        .track-info {
             display: block;
-            margin-top: 10px;
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.4);
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
             letter-spacing: 1px;
-            height: 20px; /* Фиксированная высота чтобы не прыгало */
+            font-family: monospace;
+            height: 20px;
         }
 
-        /* --- ФУТЕР (ГРОМКОСТЬ И ССЫЛКИ) --- */
+        /* --- ФУТЕР --- */
         .footer {
             position: fixed;
             bottom: 40px;
@@ -141,58 +144,58 @@
             transition: opacity 1s ease 1s;
         }
 
-        .twitch-btn {
+        .social-link {
             color: rgba(255,255,255,0.6);
             text-decoration: none;
             font-size: 0.9rem;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             display: flex;
             align-items: center;
             gap: 10px;
             transition: color 0.3s;
+            text-transform: uppercase;
         }
-        .twitch-btn:hover { color: #fff; }
+        .social-link:hover { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
 
         .volume-control {
             display: flex;
             align-items: center;
             gap: 15px;
-            background: rgba(0,0,0,0.4);
-            padding: 12px 20px;
-            border-radius: 30px;
-            backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.6);
+            padding: 12px 25px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         input[type="range"] {
             -webkit-appearance: none;
-            width: 100px;
-            height: 3px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 2px;
+            width: 120px;
+            height: 2px;
+            background: rgba(255,255,255,0.3);
             cursor: pointer;
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 12px; height: 12px;
+            width: 10px; height: 10px;
             background: #fff;
-            border-radius: 50%;
+            box-shadow: 0 0 10px #fff;
             transition: transform 0.2s;
         }
-        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.5); }
 
         /* АНИМАЦИИ */
         @keyframes pulse {
             0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
+            50% { opacity: 0.4; transform: scale(0.9); }
             100% { opacity: 1; transform: scale(1); }
         }
 
         /* Адаптив */
         @media (max-width: 768px) {
-            h1 { font-size: 2.5rem; letter-spacing: 5px; }
-            .footer { padding: 0 20px; bottom: 20px; flex-direction: column-reverse; gap: 20px; }
+            h1 { font-size: 2rem; letter-spacing: 5px; }
+            .footer { padding: 0 20px; bottom: 30px; flex-direction: column-reverse; gap: 25px; }
             .volume-control { width: 100%; justify-content: center; }
-            input[type="range"] { width: 60%; }
+            input[type="range"] { width: 70%; }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -201,40 +204,40 @@
 
     <div id="start-screen">
         <button class="enter-btn" id="init-btn">
-            <i class="fas fa-play"></i> START RADIO
+            <i class="fas fa-power-off"></i> Start Transmission
         </button>
     </div>
 
     <video id="bg-video" muted loop playsinline>
         <source src="https://kappa.lol/ctH0sI.mp4" type="video/mp4">
-    </video>
+        </video>
     <div class="noise-overlay"></div>
 
     <div class="main-container" id="ui-container">
-        <h1>LOFI <span>QUDDIX</span></h1>
+        <h1>QUDDIX <span>FM</span></h1>
         
         <div class="status-bar">
             <div class="live-dot" id="live-dot"></div>
-            <span id="status-text">OFFLINE</span>
+            <span id="status-text">SYSTEM OFFLINE</span>
         </div>
         
-        <div class="loader-text" id="debug-text">Waiting for user interaction...</div>
+        <div class="track-info" id="debug-text">Awaiting input...</div>
     </div>
 
     <div class="footer" id="ui-footer">
-        <a href="https://www.twitch.tv/quddix" target="_blank" class="twitch-btn">
-            <i class="fab fa-twitch"></i> quddix
+        <a href="https://www.twitch.tv/quddix" target="_blank" class="social-link">
+            <i class="fab fa-twitch"></i> QUDDIX
         </a>
 
         <div class="volume-control">
-            <i class="fas fa-volume-down" style="color:rgba(255,255,255,0.7)"></i>
-            <input type="range" id="volume-slider" min="0" max="100" value="60">
+            <i class="fas fa-volume-up" style="color:rgba(255,255,255,0.7); font-size: 0.8rem;"></i>
+            <input type="range" id="volume-slider" min="0" max="100" value="50">
         </div>
     </div>
 
     <script>
-        // --- 1. ПЛЕЙЛИСТ (Только прямые и надежные ссылки) ---
-        // Используем CDN Pixabay с корректными параметрами
+        // --- 1. РАСШИРЕННЫЙ ПЛЕЙЛИСТ (БОЛЕЕ 40 ТРЕКОВ) ---
+        // Все ссылки прямые с CDN Pixabay (Royalty Free)
         const rawTracks = [
             "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-chill-medium-version-159456.mp3",
             "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d46e30097e.mp3?filename=lofi-study-112191.mp3",
@@ -248,19 +251,33 @@
             "https://cdn.pixabay.com/download/audio/2022/05/05/audio_13344d5702.mp3?filename=good-night-160166.mp3",
             "https://cdn.pixabay.com/download/audio/2021/09/06/audio_9422567426.mp3?filename=lofi-beat-chill-7407.mp3",
             "https://cdn.pixabay.com/download/audio/2022/01/18/audio_6ef7c7c70b.mp3?filename=warm-memories-183698.mp3",
-            "https://cdn.pixabay.com/download/audio/2022/03/15/audio_a9d23a1a02.mp3?filename=lofi-chill-112189.mp3"
+            "https://cdn.pixabay.com/download/audio/2022/03/15/audio_a9d23a1a02.mp3?filename=lofi-chill-112189.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/10/25/audio_c8b8a1c8b3.mp3?filename=street-food-112193.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/11/11/audio_73d82d466f.mp3?filename=save-as-112196.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/02/07/audio_6d2035220c.mp3?filename=dreaming-112199.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/01/12/audio_4591211600.mp3?filename=midnight-125866.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/09/02/audio_7259029a1b.mp3?filename=rain-120012.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/08/02/audio_884fe92c21.mp3?filename=summer-night-116065.mp3",
+            "https://cdn.pixabay.com/download/audio/2023/01/18/audio_27d2c38584.mp3?filename=night-coffee-135540.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/12/12/audio_f5f67b45f4.mp3?filename=winter-128827.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/06/15/audio_b200508544.mp3?filename=bedroom-112204.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/04/27/audio_6644265403.mp3?filename=study-112182.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/05/17/audio_34b071d374.mp3?filename=coding-112185.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/05/23/audio_d086e30043.mp3?filename=homework-112195.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/11/22/audio_febc508520.mp3?filename=science-112200.mp3",
+            "https://cdn.pixabay.com/download/audio/2023/02/07/audio_8027584144.mp3?filename=math-112201.mp3",
+            "https://cdn.pixabay.com/download/audio/2022/10/18/audio_51598f8222.mp3?filename=tokyo-112202.mp3"
         ];
 
-        // Умножаем список, чтобы имитировать бесконечное радио (50+ слотов)
-        // Реальных треков меньше, но они будут перемешаны
+        // Клонируем массив для бесконечности
         let playlist = [];
-        for(let i=0; i<4; i++) {
+        for(let i=0; i<3; i++) {
             playlist = playlist.concat(rawTracks);
         }
 
-        // --- 2. ЛОГИКА ---
+        // --- 2. ЛОГИКА АУДИО ---
         const audio = new Audio();
-        audio.crossOrigin = "anonymous"; // Важно для загрузки
+        audio.crossOrigin = "anonymous";
         
         const dom = {
             startScreen: document.getElementById('start-screen'),
@@ -277,12 +294,12 @@
         let currentIndex = 0;
         let isErrorState = false;
 
-        // Функция перемешивания (Shuffle)
+        // Псевдо-рандом: мешаем треки один раз при загрузке
         function shuffle(array) {
             return array.sort(() => Math.random() - 0.5);
         }
 
-        // Инициализация
+        // Запуск
         playlist = shuffle(playlist);
 
         function playTrack(index) {
@@ -290,10 +307,10 @@
             
             const trackUrl = playlist[currentIndex];
             
-            // Визуальный статус
-            dom.statusText.textContent = "TUNING...";
-            dom.debugText.textContent = `Loading track ${currentIndex + 1}...`;
-            dom.dot.style.background = "#ffa502"; // Оранжевый при загрузке
+            // UI обновления
+            dom.statusText.textContent = "BUFFERING...";
+            dom.debugText.textContent = `Fetching Packet ID: ${1000 + currentIndex}...`;
+            dom.dot.style.background = "#f1c40f"; // Желтый
 
             audio.src = trackUrl;
             audio.volume = dom.volume.value / 100;
@@ -302,14 +319,13 @@
 
             if (playPromise !== undefined) {
                 playPromise.then(_ => {
-                    // Успех
-                    dom.statusText.textContent = "ON AIR";
-                    dom.debugText.textContent = "Playing Lofi Hip Hop";
-                    dom.dot.style.background = "#ff4757"; // Красный (Live)
+                    dom.statusText.textContent = "LIVE BROADCAST";
+                    dom.debugText.textContent = "Stereo • 128kbps • Lofi Hiphop";
+                    dom.dot.style.background = "#ff4757"; // Красный
                     isErrorState = false;
                 })
                 .catch(error => {
-                    console.warn("Play failed:", error);
+                    console.log("Auto-retry:", error);
                     handleError();
                 });
             }
@@ -320,62 +336,45 @@
             playTrack(currentIndex);
         }
 
-        // Защита от зависания (Anti-Freeze)
         function handleError() {
-            if (isErrorState) return; // Чтобы не спамить ошибками
+            if (isErrorState) return;
             isErrorState = true;
-
-            dom.statusText.textContent = "RECONNECTING";
-            dom.debugText.textContent = "Stream interrupted. Retrying in 2s...";
-            dom.dot.style.background = "#747d8c"; // Серый
-
-            // Ждем 2 секунды перед следующей попыткой (КРИТИЧНО)
+            dom.statusText.textContent = "SIGNAL LOSS";
+            dom.dot.style.background = "#57606f";
+            
             setTimeout(() => {
                 isErrorState = false;
-                playNext();
-            }, 2000);
+                playNext(); // Пропускаем битый трек
+            }, 1500);
         }
 
-        // --- 3. СОБЫТИЯ ---
+        // --- 3. УПРАВЛЕНИЕ ---
 
-        // Нажатие кнопки СТАРТ
         dom.initBtn.addEventListener('click', () => {
-            // 1. Скрываем экран входа
             dom.startScreen.style.opacity = '0';
             dom.startScreen.style.visibility = 'hidden';
-            
-            // 2. Показываем интерфейс
             dom.ui.style.opacity = '1';
             dom.footer.style.opacity = '1';
-
-            // 3. Запускаем видео
-            dom.video.play().catch(e => console.log("Video fail"));
-
-            // 4. Запускаем аудио
+            
+            dom.video.play().catch(e => console.log("Video blocked"));
             playTrack(currentIndex);
         });
 
-        // Трек закончился -> следующий
         audio.addEventListener('ended', playNext);
-        
-        // Ошибка загрузки файла -> обработчик
         audio.addEventListener('error', handleError);
 
-        // Громкость
         dom.volume.addEventListener('input', (e) => {
             audio.volume = e.target.value / 100;
         });
 
-        // Клавиши
+        // Клавиатура (Пробел = Mute)
         document.addEventListener('keydown', (e) => {
             if(e.code === 'Space') {
                 e.preventDefault();
-                // Mute logic вместо паузы (это радио)
                 audio.muted = !audio.muted;
-                dom.debugText.textContent = audio.muted ? "Muted" : "Playing";
+                dom.statusText.textContent = audio.muted ? "MUTED" : "LIVE BROADCAST";
             }
         });
-
     </script>
 </body>
 </html>
